@@ -1,22 +1,23 @@
-import { useState } from "react"
 import "./App.css"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Home from "./components/Home/Home"
+import Play from "./components/Play/Play"
+import Single from "./components/Single/Single"
+import Multi from "./components/Multi/Multi"
+import Settings from "./components/Settings/Settings"
+import RouteNotFound from "./components/RouteNotFound/RouteNotFound"
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-    </>
-  )
-}
+const App = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/play" element={<Play />} />
+      <Route path="/play/single" element={<Single />} />
+      <Route path="/play/multi" element={<Multi />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/*" element={<RouteNotFound />} />
+    </Routes>
+  </BrowserRouter>
+)
 
 export default App
