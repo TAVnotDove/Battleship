@@ -6,6 +6,9 @@ import Single from "./components/Single/Single"
 import Multi from "./components/Multi/Multi"
 import Settings from "./components/Settings/Settings"
 import RouteNotFound from "./components/RouteNotFound/RouteNotFound"
+import { io } from "socket.io-client"
+
+io("http://localhost:8080")
 
 const App = () => (
   <BrowserRouter>
