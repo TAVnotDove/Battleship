@@ -1,3 +1,6 @@
+import { useContext } from "react"
+import { SocketContext } from "../../contexts/socketContext"
+
 const numbers = ["", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 const letters = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
 const gridBoxStyle = {
@@ -13,6 +16,12 @@ const gridBoxStyle = {
 }
 
 const Create = () => {
+  const socket = useContext(SocketContext)
+
+  const clickHandler = () => {
+    socket.emit("join-room", "Test")
+  }
+
   return (
     <>
       <h1>Create</h1>
@@ -51,6 +60,7 @@ const Create = () => {
           </div>
         ))}
       </div>
+      <button onClick={clickHandler}>Join Test</button>
     </>
   )
 }

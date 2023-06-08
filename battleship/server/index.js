@@ -1,11 +1,22 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const http = require("http").createServer()
 
 const io = require("socket.io")(http, {
   cors: { origin: ["http://127.0.0.1:5173"] },
 })
 
-io.on("connection", () => {
-  console.log("a user connected")
+io.on("connection", (socket) => {
+  console.log("a user connected: ", socket.id)
+
+  console.log(io.sockets.adapter.rooms)
+
+  socket.on("join-room", (room) => {
+    socket.join(room)
+
+    console.log(`${socket.id} joined room ${room}`)
+
+    console.log(io.sockets.adapter.rooms)
+  })
 })
 
 http.listen(8080, () => console.log("listening on http://localhost:8080"))
