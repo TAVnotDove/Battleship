@@ -7,6 +7,7 @@ import Single from "./components/Single/Single"
 import Multi from "./components/Multi/Multi"
 import Create from "./components/Create/Create"
 import Join from "./components/Join/Join"
+import Game from "./components/Game/Game"
 import Settings from "./components/Settings/Settings"
 import RouteNotFound from "./components/RouteNotFound/RouteNotFound"
 
@@ -20,6 +21,7 @@ const App = () => (
         <Route path="/play/multi" element={<Multi />} />
         <Route path="/play/multi/create" element={<Create />} />
         <Route path="/play/multi/join" element={<Join />} />
+        <Route path="/play/multi/:gameName" element={<Game />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/*" element={<RouteNotFound />} />
       </Routes>

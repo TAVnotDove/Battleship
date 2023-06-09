@@ -1,66 +1,40 @@
-import { useContext } from "react"
+import { useContext, useRef } from "react"
 import { SocketContext } from "../../contexts/socketContext"
-
-const numbers = ["", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-const letters = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
-const gridBoxStyle = {
-  backgroundColor: "white",
-  border: "1px solid black",
-  width: "50px",
-  height: "50px",
-  color: "black",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  fontSize: "2rem",
-}
+import { useNavigate } from "react-router-dom"
 
 const Create = () => {
   const socket = useContext(SocketContext)
+  const inputRef: any = useRef()
+  const selectRef: any = useRef()
+  const navigate = useNavigate()
 
   const clickHandler = () => {
-    socket.emit("join-room", "Test")
+    if (inputRef.current.value.trim().length !== 0) {
+      socket.emit("join-room", inputRef.current.value.trim())
+
+      navigate(`/play/multi/${inputRef.current.value.trim()}`)
+    }
   }
 
   return (
     <>
       <h1>Create</h1>
-      <div>
-        {numbers.map((number, numberIndex) => (
-          <div key={number} style={{ display: "flex" }}>
-            {letters.map((letter, letterIndex) => {
-              if (numberIndex === 0) {
-                return (
-                  <div key={letter} style={gridBoxStyle}>
-                    {letter}
-                  </div>
-                )
-              }
-
-              if (letterIndex === 0) {
-                return (
-                  <div key={letter} style={gridBoxStyle}>
-                    {number}
-                  </div>
-                )
-              }
-
-              return (
-                <div
-                  key={letter}
-                  style={{
-                    backgroundColor: "white",
-                    border: "1px solid black",
-                    width: "50px",
-                    height: "50px",
-                  }}
-                ></div>
-              )
-            })}
-          </div>
-        ))}
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div>
+          <label htmlFor="game-name">Name:</label>
+          <input ref={inputRef} id="game-name" placeholder="Test" />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <label htmlFor="game-visibility">Visibility:</label>
+          <select ref={selectRef} id="game-visibility">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        <button type="button" onClick={clickHandler}>
+          Create Room
+        </button>
       </div>
-      <button onClick={clickHandler}>Join Test</button>
     </>
   )
 }

@@ -14,8 +14,13 @@ io.on("connection", (socket) => {
     socket.join(room)
 
     console.log(`${socket.id} joined room ${room}`)
+    console.log(io.sockets.adapter.rooms) 
+  })
 
-    console.log(io.sockets.adapter.rooms)
+  socket.on("get-rooms", () => {
+    const array = [...io.sockets.adapter.rooms.keys()]
+
+    socket.emit("get-rooms", array)
   })
 })
 
