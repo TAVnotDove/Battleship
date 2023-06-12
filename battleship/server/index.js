@@ -14,7 +14,28 @@ io.on("connection", (socket) => {
     socket.join(room)
 
     console.log(`${socket.id} joined room ${room}`)
-    console.log(io.sockets.adapter.rooms) 
+
+    console.log(io.sockets.adapter.rooms)
+  })
+
+  socket.on("game-ready", (room) => {
+    io.to(room).emit("game-ready", `user ${socket.id} is ready`)
+
+    console.log(`user ${socket.id} is ready`)
+  })
+
+  socket.on("leave-room", (room) => {
+    socket.leave(room)
+
+    console.log(`${socket.id} left room ${room}`)
+
+    console.log(io.sockets.adapter.rooms)
+  })
+
+  socket.on("get-room-players", (room) => {
+    io.to(room).emit("get-room-players", [
+      ...io.sockets.adapter.rooms.get(room).values(),
+    ])
   })
 
   socket.on("get-rooms", () => {

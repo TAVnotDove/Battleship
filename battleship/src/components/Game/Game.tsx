@@ -1,4 +1,4 @@
-import { useContext } from "react"
+import { useContext, useEffect, useState } from "react"
 import { SocketContext } from "../../contexts/socketContext"
 import { useParams } from "react-router-dom"
 
@@ -19,9 +19,29 @@ const gridBoxStyle = {
 const Game = () => {
   const socket = useContext(SocketContext)
   const { gameName } = useParams()
+  const [isReady, setIsReady] = useState(false)
+  const [players, setPlayers] = useState<string[]>([])
+
+  useEffect(() => {
+    socket.emit("get-room-players", gameName)
+
+    socket.on("get-room-players", setPlayersHandler)
+
+    return () => {
+      socket.off("get-room-players", setPlayersHandler)
+
+      socket.emit("leave-room", gameName)
+    }
+  }, [])
 
   const clickHandler = () => {
-    socket.emit("join-room", "Test")
+    socket.emit("game-ready", gameName)
+
+    setIsReady(true)
+  }
+
+  const setPlayersHandler = (players: string[]) => {
+    setPlayers(players)
   }
 
   // const grid = [[], [], [], [], [], [], [], [], [], []]
@@ -64,7 +84,15 @@ const Game = () => {
           </div>
         ))}
       </div>
-      <button onClick={clickHandler}>Join Test</button>
+      <div>
+        {players.map((playerName) => (
+          <h2 key={playerName}>
+            {playerName}
+            {playerName === socket.id && " (You)"}
+          </h2>
+        ))}
+      </div>
+      {!isReady && <button onClick={clickHandler}>Ready</button>}
     </>
   )
 }
