@@ -21,17 +21,22 @@ const Game = () => {
   const { gameName } = useParams()
   const [isReady, setIsReady] = useState(false)
   const [players, setPlayers] = useState<string[]>([])
+  const [gameStarted, setGameStarted] = useState<string>("")
+
 
   useEffect(() => {
     socket.emit("get-room-players", gameName)
 
     socket.on("get-room-players", setPlayersHandler)
+    socket.on("game-start", gameStartHandler)
 
     return () => {
       socket.off("get-room-players", setPlayersHandler)
+      socket.off("game-start", gameStartHandler)
 
       socket.emit("leave-room", gameName)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const clickHandler = () => {
@@ -42,6 +47,10 @@ const Game = () => {
 
   const setPlayersHandler = (players: string[]) => {
     setPlayers(players)
+  }
+
+  const gameStartHandler = (firstPlayer: string) => {
+    setGameStarted(firstPlayer)
   }
 
   // const grid = [[], [], [], [], [], [], [], [], [], []]
@@ -84,14 +93,18 @@ const Game = () => {
           </div>
         ))}
       </div>
-      <div>
-        {players.map((playerName) => (
-          <h2 key={playerName}>
-            {playerName}
-            {playerName === socket.id && " (You)"}
-          </h2>
-        ))}
-      </div>
+      {!gameStarted ? (
+        <div>
+          {players.map((playerName) => (
+            <h2 key={playerName}>
+              {playerName}
+              {playerName === socket.id && " (You)"}
+            </h2>
+          ))}
+        </div>
+      ) : (
+        <h2>{gameStarted === socket.id ? "Your turn" : "Opponent's turn"}</h2>
+      )}
       {!isReady && <button onClick={clickHandler}>Ready</button>}
     </>
   )

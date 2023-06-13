@@ -9,10 +9,12 @@ const Create = () => {
   const navigate = useNavigate()
 
   const clickHandler = () => {
-    if (inputRef.current.value.trim().length !== 0) {
-      socket.emit("join-room", inputRef.current.value.trim())
+    const inputValue = inputRef.current.value.trim()
+    
+    if (inputValue.length !== 0 && inputValue.length < 20) {
+      socket.emit("join-room", inputValue)
 
-      navigate(`/play/multi/${inputRef.current.value.trim()}`)
+      navigate(`/play/multi/${inputValue}`)
     }
   }
 

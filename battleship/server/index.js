@@ -5,6 +5,8 @@ const io = require("socket.io")(http, {
   cors: { origin: ["http://127.0.0.1:5173"] },
 })
 
+const gamePlayerStatuses = {}
+
 io.on("connection", (socket) => {
   console.log("a user connected: ", socket.id)
 
@@ -19,9 +21,15 @@ io.on("connection", (socket) => {
   })
 
   socket.on("game-ready", (room) => {
-    io.to(room).emit("game-ready", `user ${socket.id} is ready`)
+    if (!gamePlayerStatuses[room]) {
+      gamePlayerStatuses[room] = {}
+    }
 
-    console.log(`user ${socket.id} is ready`)
+    gamePlayerStatuses[room][socket.id] = "ready"
+
+    if (Object.values(gamePlayerStatuses[room]).length === 2) {
+      io.to(room).emit("game-start", Object.keys(gamePlayerStatuses[room])[Math.floor(Math.random() * 2)])
+    }
   })
 
   socket.on("leave-room", (room) => {
@@ -39,9 +47,10 @@ io.on("connection", (socket) => {
   })
 
   socket.on("get-rooms", () => {
-    const array = [...io.sockets.adapter.rooms.keys()]
+    const roomsArray = [...io.sockets.adapter.rooms.keys()]
+    const rooms = roomsArray.filter((room) => room.length < 20 )
 
-    socket.emit("get-rooms", array)
+    socket.emit("get-rooms", rooms)
   })
 })
 

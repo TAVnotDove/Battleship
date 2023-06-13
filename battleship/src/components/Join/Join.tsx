@@ -28,7 +28,7 @@ const Join = () => {
   return (
     <>
       <h1>Join</h1>
-      {rooms ? (
+      {rooms.length > 0 ? (
         <div>
           {rooms.map((room, i) => (
             <button key={room + i} onClick={() => joinRoomHandler(room)}>
@@ -37,7 +37,7 @@ const Join = () => {
           ))}
         </div>
       ) : (
-        <h2>Loading...</h2>
+        <h2>No rooms available.</h2>
       )}
       <button onClick={getRoomsHandler}>Refresh</button>
     </>
