@@ -23,7 +23,6 @@ const Game = () => {
   const [players, setPlayers] = useState<string[]>([])
   const [gameStarted, setGameStarted] = useState<string>("")
 
-
   useEffect(() => {
     socket.emit("get-room-players", gameName)
 
@@ -36,13 +35,38 @@ const Game = () => {
 
       socket.emit("leave-room", gameName)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const clickHandler = () => {
-    socket.emit("game-ready", gameName)
+  const grid = [
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", ""],
+  ]
 
-    setIsReady(true)
+  const clickHandler = () => {
+    let shipPositions = "-"
+
+    grid.forEach((row, rowIndex) =>
+      row.forEach((column, columnIndex) => {
+        if (column === "s") {
+          shipPositions += `${rowIndex} ${columnIndex}-`
+        }
+      })
+    )
+
+    if (shipPositions.length === 69) {
+      socket.emit("game-ready", gameName, shipPositions)
+
+      setIsReady(true)
+    }
   }
 
   const setPlayersHandler = (players: string[]) => {
@@ -52,8 +76,6 @@ const Game = () => {
   const gameStartHandler = (firstPlayer: string) => {
     setGameStarted(firstPlayer)
   }
-
-  // const grid = [[], [], [], [], [], [], [], [], [], []]
 
   return (
     <>
@@ -86,6 +108,17 @@ const Game = () => {
                     border: "1px solid black",
                     width: "50px",
                     height: "50px",
+                  }}
+                  onClick={(e) => {
+                    if (isReady) return
+
+                    if (e.currentTarget.style.backgroundColor === "white") {
+                      e.currentTarget.style.backgroundColor = "gray"
+                      grid[numberIndex - 1][letterIndex - 1] = "s"
+                    } else {
+                      e.currentTarget.style.backgroundColor = "white"
+                      grid[numberIndex - 1][letterIndex - 1] = ""
+                    }
                   }}
                 ></div>
               )
