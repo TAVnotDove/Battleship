@@ -35,6 +35,18 @@ io.on("connection", (socket) => {
     }
   })
 
+  socket.on("game-attack", (room, shipPositions) => {
+    for (let player in playerShipPositions[room]) {
+      if (player !== socket.id) {
+        if (playerShipPositions[room][player].includes(shipPositions)) {
+          io.to(room).emit("game-attack-hit", player, shipPositions)
+        } else {
+          io.to(room).emit("game-attack-missed", player, shipPositions)
+        }
+      }
+    }
+  })
+
   socket.on("leave-room", (room) => {
     socket.leave(room)
 

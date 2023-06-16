@@ -19,10 +19,14 @@ const Game = () => {
 
     socket.on("get-room-players", setPlayersHandler)
     socket.on("game-start", gameStartHandler)
+    socket.on("game-attack-hit", attackHitHandler)
+    socket.on("game-attack-missed", attackMissedHandler)
 
     return () => {
       socket.off("get-room-players", setPlayersHandler)
       socket.off("game-start", gameStartHandler)
+      socket.off("game-attack-hit", attackHitHandler)
+      socket.off("game-attack-missed", attackMissedHandler)
 
       socket.emit("leave-room", gameName)
     }
@@ -55,12 +59,42 @@ const Game = () => {
     setGameStarted(firstPlayer)
   }
 
-  const gridUpdateHandler = (gridType: string, row: number, column: number) => {
+  const attackHitHandler = (player: string, shipPositions: string) => {
+    attackHandler(player, shipPositions, "h")
+  }
+  const attackMissedHandler = (player: string, shipPositions: string) => {
+    attackHandler(player, shipPositions, "m")
+  }
+
+  const attackHandler = (
+    player: string,
+    shipPositions: string,
+    type: string
+  ) => {
+    const [row, column] = shipPositions.split(" ")
+
+    if (player === socket.id) {
+      gridUpdateHandler("defenseGrid", Number(row), Number(column), type)
+    } else {
+      gridUpdateHandler("attackGrid", Number(row), Number(column), type)
+    }
+  }
+
+  const gridUpdateHandler = (
+    gridType: string,
+    row: number,
+    column: number,
+    type: string
+  ) => {
     setGrids((previousGrids) => {
-      if (previousGrids[gridType][row][column] === "") {
-        previousGrids[gridType][row][column] = "s"
+      if (type !== "") {
+        previousGrids[gridType][row][column] = type
       } else {
-        previousGrids[gridType][row][column] = ""
+        if (previousGrids[gridType][row][column] === type) {
+          previousGrids[gridType][row][column] = "s"
+        } else {
+          previousGrids[gridType][row][column] = type
+        }
       }
 
       return { ...previousGrids }
