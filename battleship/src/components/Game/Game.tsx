@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { SocketContext } from "../../contexts/socketContext"
 import { useParams } from "react-router-dom"
 import GameGrid from "../GameGrid/GameGrid"
@@ -9,6 +9,8 @@ const Game = () => {
   const [isReady, setIsReady] = useState(false)
   const [players, setPlayers] = useState<string[]>([])
   const [gameStarted, setGameStarted] = useState<string>("")
+  const canAttack = useRef(true)
+  const [gameOverMessage, setGameOverMessage] = useState("")
   const [grids, setGrids] = useState<{ [key: string]: string[][] }>({
     defenseGrid: Array.from(Array(10), () => Array(10).fill("")),
     attackGrid: Array.from(Array(10), () => Array(10).fill("")),
@@ -78,6 +80,22 @@ const Game = () => {
     } else {
       gridUpdateHandler("attackGrid", Number(row), Number(column), type)
     }
+
+    setTimeout(() => {
+      canAttack.current = true
+
+      if (document.querySelectorAll("div[style*=crimson]").length === 17) {
+        setGameOverMessage(player === socket.id ? "You lost!" : "You won!")
+      } else {
+        setGameStarted((previousGameStarted: string) => {
+          if (previousGameStarted === socket.id) {
+            return "other"
+          }
+
+          return socket.id
+        })
+      }
+    }, 2000)
   }
 
   const gridUpdateHandler = (
@@ -116,6 +134,8 @@ const Game = () => {
             : "attackGrid"
         }
         isReady={isReady}
+        canAttack={canAttack}
+        gameOverMessage={gameOverMessage}
         gridUpdateHandler={gridUpdateHandler}
       />
       {!gameStarted ? (
@@ -127,6 +147,8 @@ const Game = () => {
             </h2>
           ))}
         </div>
+      ) : gameOverMessage ? (
+        <h2>{gameOverMessage}</h2>
       ) : (
         <h2>{gameStarted === socket.id ? "Your turn" : "Opponent's turn"}</h2>
       )}

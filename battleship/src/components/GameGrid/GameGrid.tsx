@@ -1,4 +1,4 @@
-import { useContext } from "react"
+import { MutableRefObject, useContext } from "react"
 import { useParams } from "react-router-dom"
 import { SocketContext } from "../../contexts/socketContext"
 
@@ -26,11 +26,15 @@ const GameGrid = ({
   currentGrid,
   currentGridType,
   isReady,
+  canAttack,
+  gameOverMessage,
   gridUpdateHandler,
 }: {
   currentGrid: string[][]
   currentGridType: string
   isReady: boolean
+  canAttack: MutableRefObject<boolean>
+  gameOverMessage: string
   gridUpdateHandler: (
     gridType: string,
     row: number,
@@ -81,11 +85,17 @@ const GameGrid = ({
                       )
                         return
 
-                      socket.emit(
-                        "game-attack",
-                        gameName,
-                        `${numberIndex - 1} ${letterIndex - 1}`
-                      )
+                      if (gameOverMessage.length === 0) {
+                        if (canAttack.current) {
+                          canAttack.current = false
+
+                          socket.emit(
+                            "game-attack",
+                            gameName,
+                            `${numberIndex - 1} ${letterIndex - 1}`
+                          )
+                        }
+                      }
                     }
 
                     return
