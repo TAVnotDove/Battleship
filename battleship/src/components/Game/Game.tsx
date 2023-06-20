@@ -6,11 +6,20 @@ import GameGrid from "../GameGrid/GameGrid"
 const Game = () => {
   const socket = useContext(SocketContext)
   const { gameName } = useParams()
-  const [isReady, setIsReady] = useState(false)
-  const [players, setPlayers] = useState<string[]>([])
-  const [gameStarted, setGameStarted] = useState<string>("")
+  const [gameState, setGameState] = useState<{
+    isReady: boolean
+    players: string[]
+    currentTurn: "player" | "opponent"
+    gameStarted: boolean
+    gameOverMessage: string
+  }>({
+    isReady: false,
+    players: [],
+    currentTurn: "opponent",
+    gameStarted: false,
+    gameOverMessage: "",
+  })
   const canAttack = useRef(true)
-  const [gameOverMessage, setGameOverMessage] = useState("")
   const [grids, setGrids] = useState<{ [key: string]: string[][] }>({
     defenseGrid: Array.from(Array(10), () => Array(10).fill("")),
     attackGrid: Array.from(Array(10), () => Array(10).fill("")),
@@ -49,16 +58,26 @@ const Game = () => {
     if (shipPositions.length === 69) {
       socket.emit("game-ready", gameName, shipPositions)
 
-      setIsReady(true)
+      setGameState((previousGameState) => {
+        return { ...previousGameState, isReady: true }
+      })
     }
   }
 
   const setPlayersHandler = (players: string[]) => {
-    setPlayers(players)
+    setGameState((previousGameState) => {
+      return { ...previousGameState, players }
+    })
   }
 
-  const gameStartHandler = (firstPlayer: string) => {
-    setGameStarted(firstPlayer)
+  const gameStartHandler = (firstPlayer: "string") => {
+    setGameState((previousGameState) => {
+      return {
+        ...previousGameState,
+        currentTurn: firstPlayer === socket.id ? "player" : "opponent",
+        gameStarted: true,
+      }
+    })
   }
 
   const attackHitHandler = (player: string, shipPositions: string) => {
@@ -85,14 +104,19 @@ const Game = () => {
       canAttack.current = true
 
       if (document.querySelectorAll("div[style*=crimson]").length === 17) {
-        setGameOverMessage(player === socket.id ? "You lost!" : "You won!")
+        setGameState((previousGameState) => {
+          return {
+            ...previousGameState,
+            gameOverMessage: player === socket.id ? "You lost!" : "You won!",
+          }
+        })
       } else {
-        setGameStarted((previousGameStarted: string) => {
-          if (previousGameStarted === socket.id) {
-            return "other"
+        setGameState((previousGameState) => {
+          if (previousGameState.currentTurn === "player") {
+            return { ...previousGameState, currentTurn: "opponent" }
           }
 
-          return socket.id
+          return { ...previousGameState, currentTurn: "player" }
         })
       }
     }, 2000)
@@ -124,35 +148,35 @@ const Game = () => {
       <h1>Game {gameName}</h1>
       <GameGrid
         currentGrid={
-          gameStarted === "" || gameStarted !== socket.id
+          gameState.currentTurn === "opponent"
             ? grids.defenseGrid
             : grids.attackGrid
         }
         currentGridType={
-          gameStarted === "" || gameStarted !== socket.id
-            ? "defenseGrid"
-            : "attackGrid"
+          gameState.currentTurn === "opponent" ? "defenseGrid" : "attackGrid"
         }
-        isReady={isReady}
+        isReady={gameState.isReady}
         canAttack={canAttack}
-        gameOverMessage={gameOverMessage}
+        gameOverMessage={gameState.gameOverMessage}
         gridUpdateHandler={gridUpdateHandler}
       />
-      {!gameStarted ? (
+      {!gameState.gameStarted ? (
         <div>
-          {players.map((playerName) => (
+          {gameState.players.map((playerName) => (
             <h2 key={playerName}>
               {playerName}
               {playerName === socket.id && " (You)"}
             </h2>
           ))}
         </div>
-      ) : gameOverMessage ? (
-        <h2>{gameOverMessage}</h2>
+      ) : gameState.gameOverMessage ? (
+        <h2>{gameState.gameOverMessage}</h2>
       ) : (
-        <h2>{gameStarted === socket.id ? "Your turn" : "Opponent's turn"}</h2>
+        <h2>
+          {gameState.currentTurn === "player" ? "Your turn" : "Opponent's turn"}
+        </h2>
       )}
-      {!isReady && <button onClick={clickHandler}>Ready</button>}
+      {!gameState.isReady && <button onClick={clickHandler}>Ready</button>}
     </>
   )
 }
