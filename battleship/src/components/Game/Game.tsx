@@ -20,6 +20,7 @@ const Game = () => {
     gameOverMessage: "",
   })
   const canAttack = useRef(true)
+  const battleshipsLeft = useRef(17)
   const [grids, setGrids] = useState<{ [key: string]: string[][] }>({
     defenseGrid: Array.from(Array(10), () => Array(10).fill("")),
     attackGrid: Array.from(Array(10), () => Array(10).fill("")),
@@ -133,9 +134,15 @@ const Game = () => {
         previousGrids[gridType][row][column] = type
       } else {
         if (previousGrids[gridType][row][column] === type) {
-          previousGrids[gridType][row][column] = "s"
+          if (battleshipsLeft.current > 0) {
+            previousGrids[gridType][row][column] = "s"
+
+            battleshipsLeft.current--
+          }
         } else {
           previousGrids[gridType][row][column] = type
+
+          battleshipsLeft.current++
         }
       }
 
@@ -176,7 +183,12 @@ const Game = () => {
           {gameState.currentTurn === "player" ? "Your turn" : "Opponent's turn"}
         </h2>
       )}
-      {!gameState.isReady && <button onClick={clickHandler}>Ready</button>}
+      {!gameState.isReady && (
+        <>
+          <p>Battleships left: {battleshipsLeft.current}</p>
+          <button onClick={clickHandler}>Ready</button>
+        </>
+      )}
     </>
   )
 }
