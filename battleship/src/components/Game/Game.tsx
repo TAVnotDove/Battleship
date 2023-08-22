@@ -186,7 +186,9 @@ const Game = () => {
       {!gameState.isReady && (
         <>
           <p>Battleships left: {battleshipsLeft.current}</p>
-          <button onClick={clickHandler}>Ready</button>
+          <button onClick={clickHandler} disabled={battleshipsLeft.current > 0}>
+            Ready
+          </button>
         </>
       )}
     </>

@@ -15,6 +15,23 @@ const gridBoxStyle = {
   alignItems: "center",
   fontSize: "2rem",
 }
+const shipBoxStyle: { [key: string]: string } = {
+  position: "absolute",
+  backgroundColor: "white",
+  width: "310px",
+  height: "410px",
+  left: "622px",
+  border: "1px solid black",
+  display: "flex",
+  flexDirection: "column",
+}
+const shipStyle = {
+  backgroundColor: "gray",
+  border: "1px solid black",
+  height: "50px",
+  margin: "25px 25px 0px 25px",
+}
+
 const gridColors: { [key: string]: string } = {
   "": "white",
   s: "gray",
@@ -46,7 +63,14 @@ const GameGrid = ({
   const { gameName } = useParams()
 
   return (
-    <div>
+    <div style={{ position: "relative" }}>
+      <div style={shipBoxStyle}>
+        <div style={{ width: "260px", ...shipStyle }}></div>
+        <div style={{ width: "208px", ...shipStyle }}></div>
+        <div style={{ width: "156px", ...shipStyle }}></div>
+        <div style={{ width: "156px", ...shipStyle }}></div>
+        <div style={{ width: "104px", ...shipStyle }}></div>
+      </div>
       {numbers.map((number, numberIndex) => (
         <div key={number} style={{ display: "flex" }}>
           {letters.map((letter, letterIndex) => {
